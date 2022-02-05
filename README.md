@@ -21,6 +21,12 @@ Traverse to appearance and enable developer mode if it is not enabled.
 ![https://imgur.com/LTrGjVX](https://i.imgur.com/LTrGjVX.png "Step 2")
 ![https://imgur.com/7ItCXBV](https://i.imgur.com/7ItCXBV.png "Step 3")
 
+**UPDATE:**
+It appears that the developers of the Discord desktop application have implemented another method by which to keep people from normally being able to access the developer tools.
+![https://i.imgur.com/BuZf2qn.png](https://i.imgur.com/BuZf2qn.png "Step 3.5")
+
+This doesn't necessarily prevent us from being able to make use of this script but I'm definitely going to have to figure something out that doesn't require you to have to put in your passwords or any two-factor authentication tokens; this is the most convenient method for me to implement for the time-being but it's becoming increasingly difficult to continue on like this given that people have accidentally pushed their own authorization tokens to their own public forks of this repository in the past which only serves to reinforce decisions like this from the Discord staff.
+
 ### Website:
 
 **Step 4:**
