@@ -46,7 +46,7 @@ def getLastMessageGuild(scraper, guild, channel):
         # If we returned nothing then return nothing.
         if response is None:
             return None
-        
+
         # Read the response data and convert it into a dictionary object.
         data = loads(response.read())
 
@@ -83,7 +83,11 @@ def startGuild(scraper, guild, channel, day=None):
     snowflakes = DiscordScraper.getDayBounds(day.day, day.month, day.year)
 
     # Generate a valid URL to the undocumented API function for the search feature.
-    search = 'https://discord.com/api/{0}/channels/{1}/messages/search?min_id={2}&max_id={3}&{4}'.format(scraper.apiversion, channel, snowflakes[0], snowflakes[1], scraper.query)
+
+    #  "https://discord.com/api/v9/channels/866378471868727319/messages?before=942755983929798686&limit=50"
+
+    # maybe snowflakes[1]?
+    search = 'https://discord.com/api/{0}/channels/{1}/messages?before={2}&limit={3}'.format(scraper.apiversion, channel, snowflakes[1], 50)
 
     # Update the HTTP request headers to set the referer to the current guild channel URL.
     scraper.headers.update({'Referer': 'https://discord.com/channels/{0}/{1}'.format(guild, channel)})
@@ -111,39 +115,12 @@ def startGuild(scraper, guild, channel, day=None):
 
             # Recursively call this function with the new day.
             startGuild(scraper, guild, channel, day)
-        
+
         # Read the response data.
         data = loads(response.read().decode('iso-8859-1'))
-        
+
         # Get the number of posts.
-        posts = data['total_results']
-        
-        # Determine if we have multiple offsets.
-        if (posts > 25):
-            pages = int(posts / 25) + 1
-            
-            for page in range(2, pages + 1):
-                # Generate a valid URL to the undocumented API function for the search feature.
-                search = 'https://discord.com/api/{0}/channels/{1}/messages/search?min_id={2}&max_id={3}&{4}&offset={5}'.format(scraper.apiversion, channel, snowflakes[0], snowflakes[1], scraper.query, 25 * (page - 1))
-
-                # Update the HTTP request headers to set the referer to the current guild channel URL.
-                scraper.headers.update({'Referer': 'https://discord.com/channels/{0}/{1}'.format(guild, channel)})
-
-                try:
-
-                    # Grab the API response for the search query URL.
-                    response = DiscordScraper.requestData(search, scraper.headers)
-                    
-                    # Read the response data.
-                    data2 = loads(response.read().decode('iso-8859-1'))
-                    
-                    # Append the messages from data2 into data.
-                    for message in data2['messages']:
-                        data['messages'].append(message)
-                        
-                except:
-                    pass
-            
+        posts = len(data)
 
         # Cache the JSON data if there's anything to cache (don't fill the cache directory with useless API response junk).
         if posts > 0:
@@ -151,16 +128,16 @@ def startGuild(scraper, guild, channel, day=None):
 
         # Check the mimetypes of the embedded and attached files.
         scraper.checkMimetypes(data)
-        
+
     except:
         pass
 
     # Set the day to yesterday.
     day += timedelta(days=-1)
-    
+
     # Return the new day
     return day
-        
+
 def start(scraper, guild, channel, day=None):
     """
     The initialization function for the scraper script.
@@ -168,11 +145,11 @@ def start(scraper, guild, channel, day=None):
     :param guild: The ID for the guild that we're wanting to scrape from.
     :param channel: The ID for the channel that we're wanting to scrape from.
     """
-    
+
     # Determine if we've already initialized the DiscordScraper class, if so then clean it out and re-initialize a new one.
     if scraper is not None:
         del scraper
-        scraper = DiscordScraper()
+        scraper = DiscordScraper(apiversion='v9')
 
     # Determine if the day is empty, default to the current day if so.
     if day is None:
@@ -181,9 +158,11 @@ def start(scraper, guild, channel, day=None):
     # Determine if the year is no less than 2015 since any time before this point will be guaranteed invalid.
     if day.year <= 2014:
         exit(0)
-        
+
     # The smallest snowflake that Discord recognizes is from January 1, 2015.
-    while day > datetime(2015, 1, 1):
+    #    while day > datetime(2015, 1, 1):
+    print(f"Days to scrape: {scraper.daysToScrape}")
+    while day > datetime.today() - timedelta(days=scraper.daysToScrape):
         day = startGuild(scraper, guild, channel, day)
 
 if __name__ == '__main__':
@@ -205,7 +184,7 @@ if __name__ == '__main__':
 
             # Start the scraper for the current channel.
             start(discordscraper, guild, channel, lastdate)
-    
+
     # Iterate through the direct messages to scrape.
     for alias, channel in discordscraper.directs.items():
 
