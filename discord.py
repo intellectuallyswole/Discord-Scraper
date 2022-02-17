@@ -92,6 +92,8 @@ def startGuild(scraper, guild, channel, day=None):
     # Update the HTTP request headers to set the referer to the current guild channel URL.
     scraper.headers.update({'Referer': 'https://discord.com/channels/{0}/{1}'.format(guild, channel)})
 
+    print(f"Search: {search}")
+    print(f"Headers: {scraper.headers}")
     try:
         # Generate the guild name.
         if scraper.guildname == None:
