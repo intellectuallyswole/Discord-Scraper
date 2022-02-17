@@ -2,10 +2,15 @@ import sys
 from os import walk, listdir
 import json
 
+def help():
+    print("""
+        Usage: python formatter.py <directory of Discord API json scraped files> <output file to write transcript>
+        """)
+    exit(0)
 
 def main(argv):
-    if len(argv) > 3:
-        raise Exception("Invalid arguments")
+    if len(argv) != 3:
+        help()
     dirname = argv[1]
     files = []
     messages = []
